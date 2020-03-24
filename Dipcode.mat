@@ -1,0 +1,35 @@
+OutputFolder = 'C:\Users\sastra\Desktop\images';     %Place where all final OTPs get stored
+dinfo = dir('C:\Users\sastra\Desktop\images\*.jpg');   %Place where the present datasets are present 
+offset=1;
+for K = 1 : length(dinfo)
+  thisimage = dinfo(K).name;
+  I   = imread(thisimage);
+  %Y     = imshow(Img);
+ 
+ %imshow(I);
+ I = rgb2gray(Img);
+ points = detectSURFFeatures(I);
+   [features, valid_points] = extractFeatures(I, points);
+      figure; hold on;
+      siz_feat = size(features);
+     s=randperm(siz_feat(1))(1);
+ X=valid_points.Location(1:s-1,1);
+ Y=valid_points.Location(1:s-1,2);
+ f=0;
+ sum=0;
+ for c=(1:s-2)
+   a=round(atan(Y(c+1)-Y(c)/X(c+1)-X(c))*180/pi);
+   l=round(norm([X(c) Y(c)]-[X(c+1) Y(c+1)] ));
+  k3=bitxor(int64(l),int64(a),'int64');
+  f=f+k3;
+  sum=sum+features(c);
+ end
+  val=dec2bin(typecast(int16(double(sum)*f),'uint16'));
+sha256hasher = System.Security.Cryptography.SHA256Managed;
+sha256 = uint8(sha256hasher.ComputeHash(uint8(val)));
+x = dec2hex(sha256);
+dest1=x(1) +""+ x(length(x)) +""+ x(round(length(x)/2)) + "" + x(1,2) + "" + x(length(x),2) + "" + x(round(length(x)/2),2) 
+xlswrite('./filename.xls',[thisimage dest1], 1, sprintf('A%d',offset));
+      offset = offset + 1;
+end
+
